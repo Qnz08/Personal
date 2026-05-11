@@ -1,0 +1,7 @@
+{
+  "name": "Personal Focus Assistant",
+  "short_name": "Focus",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000"
+}

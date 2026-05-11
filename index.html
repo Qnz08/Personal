@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Focus</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <script defer type="module" src="app.js"></script>
+</head>
+<body>
+
+  <!-- ===== TOP BAR ===== -->
+  <div id="topbar">
+    <div id="topbar-title">Focus</div>
+  </div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div id="main">
+
+    <!-- ASSIST VIEW -->
+    <div id="assist-view" class="view">
+      <div class="view-header">
+        <h1>Jetzt tun</h1>
+      </div>
+
+      <div class="card" id="inputs-card">
+        <div class="input-row">
+          <label class="input-label">
+            <span class="label-text">Zeit</span>
+            <div class="input-suffix-wrap">
+              <input type="number" id="time" value="30" class="inline-input">
+              <span class="input-suffix">Min</span>
+            </div>
+          </label>
+          <label class="input-label">
+            <span class="label-text">Energie</span>
+            <select id="energy" class="inline-select">
+              <option value="1">Niedrig</option>
+              <option value="3" selected>Mittel</option>
+              <option value="5">Hoch</option>
+            </select>
+          </label>
+        </div>
+        <button id="decide" class="btn btn-primary btn-full">Empfehlen</button>
+      </div>
+
+      <section id="result" class="card hidden"></section>
+
+      <div class="section-title">Neue Aufgabe</div>
+      <div class="card" id="newTask">
+        <label class="field-label">
+          <span>Titel</span>
+          <input type="text" id="taskTitle" placeholder="Aufgabentitel" class="field-input">
+        </label>
+        <div class="field-row">
+          <label class="field-label half">
+            <span>Minuten</span>
+            <input type="number" id="taskMinutes" value="30" class="field-input">
+          </label>
+          <label class="field-label half">
+            <span>Fällig</span>
+            <input type="date" id="taskDeadline" class="field-input">
+          </label>
+        </div>
+        <div class="field-row">
+          <label class="field-label half">
+            <span>Wichtigkeit</span>
+            <select id="taskImportance" class="field-input">
+              <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
+            </select>
+          </label>
+          <label class="field-label half">
+            <span>Belastung</span>
+            <select id="taskMentalLoad" class="field-input">
+              <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <div class="btn-group">
+          <button id="addTask" class="btn btn-primary">Hinzufügen</button>
+          <button id="loadUntisBtn" class="btn btn-secondary">📚 Untis laden</button>
+        </div>
+      </div>
+
+      <div class="section-title">Aufgaben</div>
+      <div class="card task-list-card">
+        <ul id="taskList" class="task-list"></ul>
+      </div>
+    </div>
+
+    <!-- PROFILE VIEW -->
+    <div id="profile-view" class="view hidden">
+      <div class="view-header">
+        <h1>Profil</h1>
+      </div>
+
+      <div id="profileAccount" class="card">
+        <div id="profileStatus" class="profile-status"></div>
+        <div id="authPrompt" class="profile-hint">
+          <p>Nicht angemeldet. Registriere dich oder melde dich an.</p>
+        </div>
+        <div id="authSection" class="auth-fields">
+          <label class="field-label">
+            <span>E-Mail</span>
+            <input type="email" id="authEmail" placeholder="E-Mail" class="field-input">
+          </label>
+          <label class="field-label">
+            <span>Passwort</span>
+            <input type="password" id="authPassword" placeholder="Passwort" class="field-input">
+          </label>
+          <div class="btn-group">
+            <button id="registerBtn" type="button" class="btn btn-secondary">Registrieren</button>
+            <button id="loginBtn" type="button" class="btn btn-primary">Anmelden</button>
+          </div>
+        </div>
+        <div id="logoutSection" class="profile-block hidden">
+          <button id="logoutBtn" type="button" class="btn btn-destructive btn-full">Abmelden</button>
+        </div>
+      </div>
+
+      <div class="section-title">Einstellungen</div>
+      <div id="settingsForm" class="card">
+        <label class="settings-row">
+          <span class="settings-label">Erscheinungsbild</span>
+          <select id="settingsTheme" class="settings-control">
+            <option value="dark">Dunkel</option>
+            <option value="light">Hell</option>
+          </select>
+        </label>
+        <div class="settings-divider"></div>
+        <label class="settings-row">
+          <span class="settings-label">Standardzeit (Min)</span>
+          <input type="number" id="settingsDefaultMinutes" min="5" max="180" value="30" class="settings-control settings-number">
+        </label>
+        <div class="settings-divider"></div>
+        <label class="settings-row">
+          <span class="settings-label">Startseite</span>
+          <select id="settingsDefaultView" class="settings-control">
+            <option value="assist">Assist</option>
+            <option value="calendar">Kalender</option>
+            <option value="routines">Routinen</option>
+            <option value="profile">Profil</option>
+            <option value="shopping">Einkaufsliste</option>
+          </select>
+        </label>
+        <div class="settings-divider"></div>
+        <label class="settings-row">
+          <span class="settings-label">Aufgaben ohne Datum einbeziehen</span>
+          <input type="checkbox" id="settingsIncludeUndated" class="settings-toggle">
+        </label>
+        <div class="settings-divider"></div>
+        <label class="settings-row">
+          <span class="settings-label">Aufgaben sortieren nach</span>
+          <select id="settingsTaskSort" class="settings-control">
+            <option value="deadline">Fälligkeit</option>
+            <option value="importance">Wichtigkeit</option>
+            <option value="mentalLoad">Belastung</option>
+            <option value="title">Name (A–Z)</option>
+          </select>
+        </label>
+        <div class="settings-divider"></div>
+        <label class="settings-row">
+          <span class="settings-label">Kompakter Modus</span>
+          <input type="checkbox" id="settingsCompactMode" class="settings-toggle">
+        </label>
+        <div class="settings-divider"></div>
+        <label class="settings-row">
+          <span class="settings-label">Erinnerung bei ungespeicherten Änderungen</span>
+          <input type="checkbox" id="settingsAutoSaveReminder" class="settings-toggle">
+        </label>
+        <div class="btn-group" style="margin-top:16px;">
+          <button id="saveSettingsBtn" class="btn btn-primary">Speichern</button>
+          <button id="resetSettingsBtn" type="button" class="btn btn-ghost">Zurücksetzen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR VIEW -->
+    <div id="calendar-view" class="view hidden">
+      <div class="view-header calendar-view-header">
+        <h1>Kalender</h1>
+        <button id="calendarAddBtn" class="icon-btn">＋</button>
+      </div>
+
+      <div id="calendar-controls" class="calendar-controls">
+        <div class="segment-control">
+          <button id="monthView" class="segment active-segment">Monat</button>
+          <button id="yearView" class="segment">Jahr</button>
+        </div>
+        <div class="nav-arrows">
+          <button id="prevPeriod" class="arrow-btn">‹</button>
+          <span id="currentPeriodLabel"></span>
+          <button id="nextPeriod" class="arrow-btn">›</button>
+        </div>
+      </div>
+
+      <div id="calendarQuickAdd" class="card calendar-quick-add hidden">
+        <div class="quick-add-header">
+          <span class="quick-add-title">Neue Aufgabe</span>
+          <button id="calendarCloseQuickAdd" type="button" class="close-btn">✕</button>
+        </div>
+        <label class="field-label">
+          <span>Titel</span>
+          <input type="text" id="calendarTaskTitle" placeholder="Titel" class="field-input">
+        </label>
+        <div class="field-row">
+          <label class="field-label half">
+            <span>Tag</span>
+            <input type="number" id="calendarTaskDay" placeholder="TT" min="1" max="31" class="field-input">
+          </label>
+          <label class="field-label half">
+            <span>Monat</span>
+            <input type="number" id="calendarTaskMonth" placeholder="MM" min="1" max="12" class="field-input">
+          </label>
+        </div>
+        <div class="field-row">
+          <label class="field-label half">
+            <span>Minuten</span>
+            <input type="number" id="calendarTaskMinutes" value="30" class="field-input">
+          </label>
+          <label class="field-label half">
+            <span>Wichtigkeit</span>
+            <select id="calendarTaskImportance" class="field-input">
+              <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <label class="field-label">
+          <span>Belastung</span>
+          <select id="calendarTaskMentalLoad" class="field-input">
+            <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+          </select>
+        </label>
+        <button id="calendarAddTaskBtn" type="button" class="btn btn-primary btn-full">Speichern</button>
+      </div>
+
+      <div id="calendar" class="calendar-grid"></div>
+    </div>
+
+    <!-- ROUTINE VIEW -->
+    <div id="routine-view" class="view hidden">
+      <div class="view-header">
+        <h1>Routinen</h1>
+      </div>
+
+      <div class="card" id="routineFormSection">
+        <div class="card-section-title">Routine anlegen</div>
+        <label class="field-label">
+          <span>Titel</span>
+          <input type="text" id="routineTitle" placeholder="Routinetitel" class="field-input">
+        </label>
+        <div class="field-row">
+          <label class="field-label half">
+            <span>Minuten</span>
+            <input type="number" id="routineMinutes" value="30" class="field-input">
+          </label>
+          <label class="field-label half">
+            <span>Wichtigkeit</span>
+            <select id="routineImportance" class="field-input">
+              <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <label class="field-label">
+          <span>Belastung</span>
+          <select id="routineMentalLoad" class="field-input">
+            <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+          </select>
+        </label>
+        <div class="weekday-grid">
+          <label class="weekday-option"><input type="checkbox" value="workday"> <span>Werktag</span></label>
+          <label class="weekday-option"><input type="checkbox" value="1"> <span>Mo</span></label>
+          <label class="weekday-option"><input type="checkbox" value="2"> <span>Di</span></label>
+          <label class="weekday-option"><input type="checkbox" value="3"> <span>Mi</span></label>
+          <label class="weekday-option"><input type="checkbox" value="4"> <span>Do</span></label>
+          <label class="weekday-option"><input type="checkbox" value="5"> <span>Fr</span></label>
+          <label class="weekday-option"><input type="checkbox" value="6"> <span>Sa</span></label>
+          <label class="weekday-option"><input type="checkbox" value="0"> <span>So</span></label>
+        </div>
+        <div class="btn-group">
+          <button id="saveRoutineBtn" class="btn btn-primary">Speichern</button>
+          <button id="resetRoutineBtn" class="btn btn-ghost">Neu</button>
+          <button id="deleteRoutineBtn" class="btn btn-destructive" style="display:none;">Löschen</button>
+        </div>
+      </div>
+
+      <div class="section-title">Meine Routinen</div>
+      <div class="card">
+        <div id="routineList" class="routine-list"></div>
+      </div>
+    </div>
+
+    <!-- SHOPPING VIEW -->
+    <div id="shopping-view" class="view hidden">
+      <div class="view-header shopping-view-header">
+        <h1>Einkaufsliste</h1>
+        <div id="shopping-sync-status" class="sync-badge sync-ok">Live</div>
+      </div>
+
+      <div id="shopping-login-hint" class="info-banner hidden">
+        <span>⚠️ Anmelden, um die Liste zu teilen.</span>
+      </div>
+
+      <div class="card shopping-add-card">
+        <div class="shopping-add-row">
+          <input type="text" id="shoppingInput" placeholder="Artikel hinzufügen…" autocomplete="off" class="field-input shopping-text-input">
+          <select id="shoppingCategory" class="field-input shopping-cat-select">
+            <option value="🥦 Gemüse & Obst">🥦 Gemüse & Obst</option>
+            <option value="🥛 Milch & Käse">🥛 Milch & Käse</option>
+            <option value="🍞 Brot & Gebäck">🍞 Brot & Gebäck</option>
+            <option value="🥩 Fleisch & Wurst">🥩 Fleisch & Wurst</option>
+            <option value="🧴 Drogerie">🧴 Drogerie</option>
+            <option value="🥫 Vorräte">🥫 Vorräte</option>
+            <option value="🧊 Tiefkühl">🧊 Tiefkühl</option>
+            <option value="🍷 Getränke">🍷 Getränke</option>
+            <option value="🛒 Sonstiges" selected>🛒 Sonstiges</option>
+          </select>
+        </div>
+        <button id="shoppingAddBtn" class="btn btn-primary btn-full">Hinzufügen</button>
+      </div>
+
+      <div id="shopping-filter-row" class="filter-row">
+        <button class="filter-pill active-filter" data-filter="all">Alle</button>
+        <button class="filter-pill" data-filter="open">Offen</button>
+        <button class="filter-pill" data-filter="done">Erledigt</button>
+      </div>
+
+      <div id="shoppingList" class="shopping-list"></div>
+
+      <div class="shopping-footer">
+        <span id="shoppingCount" class="shopping-count"></span>
+        <button id="clearDoneBtn" class="btn btn-ghost btn-small">Erledigte löschen</button>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside id="sidebar">
+    <div id="sidebar-logo">Focus</div>
+    <nav id="sidebar-nav">
+      <button class="sidebar-btn active-sidebar" id="sideAssist" data-view="assist">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span class="sidebar-label">Fokus</span>
+      </button>
+      <button class="sidebar-btn" id="sideCalendar" data-view="calendar">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="sidebar-label">Kalender</span>
+      </button>
+      <button class="sidebar-btn" id="sideRoutine" data-view="routines">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        <span class="sidebar-label">Routinen</span>
+      </button>
+      <button class="sidebar-btn" id="sideShopping" data-view="shopping">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="sidebar-label">Einkauf</span>
+      </button>
+      <button class="sidebar-btn" id="sideProfile" data-view="profile">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="sidebar-label">Profil</span>
+      </button>
+    </nav>
+    <div id="sidebar-user">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span id="userLabel">Nicht angemeldet</span>
+    </div>
+  </aside>
+
+  <!-- ===== BOTTOM TAB BAR (mobile only) ===== -->
+  <nav id="tabbar">
+    <button class="tab-btn active-tab" id="tabAssist" data-view="assist">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Fokus</span>
+    </button>
+    <button class="tab-btn" id="tabCalendar" data-view="calendar">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Kalender</span>
+    </button>
+    <button class="tab-btn" id="tabRoutine" data-view="routines">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      <span>Routinen</span>
+    </button>
+    <button class="tab-btn" id="tabShopping" data-view="shopping">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <span>Einkauf</span>
+    </button>
+    <button class="tab-btn" id="tabProfile" data-view="profile">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profil</span>
+    </button>
+  </nav>
+
+  <!-- ===== TASK MODAL ===== -->
+  <div id="taskModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <span class="modal-title">Aufgabe bearbeiten</span>
+        <button id="closeModal" class="close-btn">✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="field-label">
+          <span>Titel</span>
+          <input type="text" id="modalTitle" class="field-input">
+        </label>
+        <div class="field-row">
+          <label class="field-label half">
+            <span>Minuten</span>
+            <input type="number" id="modalMinutes" class="field-input">
+          </label>
+          <label class="field-label half">
+            <span>Fällig</span>
+            <input type="date" id="modalDeadline" class="field-input">
+          </label>
+        </div>
+        <div class="field-row">
+          <label class="field-label half">
+            <span>Wichtigkeit</span>
+            <select id="modalImportance" class="field-input">
+              <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
+            </select>
+          </label>
+          <label class="field-label half">
+            <span>Belastung</span>
+            <select id="modalMentalLoad" class="field-input">
+              <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button id="saveTaskBtn" class="btn btn-primary btn-full">Speichern</button>
+          <div class="btn-group">
+            <button id="cancelTaskBtn" class="btn btn-ghost">Abbrechen</button>
+            <button id="deleteTaskBtn" class="btn btn-destructive">Löschen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
