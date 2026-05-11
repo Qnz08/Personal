@@ -104,11 +104,159 @@ function startShoppingListener() {
   );
 }
 
+// ─────────────────────────────────────────────
+//  AUTOMATISCHE KATEGORIEERKENNUNG (lokal, kein Server nötig)
+// ─────────────────────────────────────────────
+
+const CATEGORY_KEYWORDS = {
+  "🥦 Gemüse & Obst": [
+    "apfel","äpfel","birne","birnen","banane","bananen","orange","orangen","zitrone","zitronen",
+    "limette","mango","mangos","ananas","traube","trauben","erdbeere","erdbeeren","himbeere",
+    "himbeeren","blaubeere","blaubeeren","johannisbeere","kirsche","kirschen","pflaume","pflaumen",
+    "pfirsich","nektarine","melone","wassermelone","kiwi","feige","feigen","papaya","avocado",
+    "avocados","tomate","tomaten","gurke","gurken","paprika","zucchini","aubergine","brokkoli",
+    "blumenkohl","rosenkohl","kohl","rotkohl","weißkohl","spitzkohl","spinat","salat","kopfsalat",
+    "feldsalat","rucola","eisbergsalat","romana","chicorée","endivie","lauch","porree","zwiebel",
+    "zwiebeln","knoblauch","schalotte","karotte","karotten","möhre","möhren","rübe","rüben",
+    "pastinake","sellerie","petersilienwurzel","rote bete","kohlrabi","fenchel","spargel",
+    "artischocke","mais","erbsen","bohnen","linsen","pilze","champignons","pfifferlinge",
+    "steinpilze","kartoffel","kartoffeln","süßkartoffel","ingwer","kurkuma","chili","chilischote",
+    "peperoni","radieschen","rettich","kresse","pak choi","mango","datteln","cranberry",
+    "physalis","granatapfel","clementine","mandarine","grapefruit","pomelo","papaya","guave",
+    "litschi","kokosnuss","maroni","kastanie","kürbis","hokkaido","butternut","obst","gemüse",
+    "frisch","bio","saisonal"
+  ],
+  "🥛 Milch & Käse": [
+    "milch","vollmilch","fettarme milch","laktosefrei","hafermilch","mandelmilch","sojamilch",
+    "reismilch","kokosmilch","butter","margarine","sahne","schlagsahne","crème fraîche","schmand",
+    "saure sahne","joghurt","naturjoghurt","fruchtjoghurt","skyr","quark","magerquark",
+    "speisequark","frischkäse","philadelphia","ricotta","mascarpone","mozzarella","gouda",
+    "edamer","emmentaler","cheddar","parmesan","pecorino","brie","camembert","gorgonzola",
+    "feta","halloumi","hüttenkäse","cottage cheese","käse","scheibletten","schmelzkäse",
+    "kräuterfrischkäse","ei","eier","hühnerei","freilandeier","biomilch","kondensmilch",
+    "pudding","dessert","kakao","schokomilch"
+  ],
+  "🍞 Brot & Gebäck": [
+    "brot","vollkornbrot","toastbrot","toast","weißbrot","schwarzbrot","roggenbrot","mehrkornbrot",
+    "laugenbrot","ciabatta","baguette","brötchen","semmel","schrippe","croissant","brezel",
+    "laugenbrezel","bagel","tortilla","wrap","pita","naan","fladenbrot","knäckebrot",
+    "zwieback","keks","kekse","plätzchen","waffel","waffeln","kuchen","torte","muffin",
+    "brownie","donut","berliner","hefezopf","stollen","panettone","rührkuchen","sandkuchen",
+    "biskuit","biskuitboden","blätterteig","mürbeteig","hefeteig","backpulver","hefe",
+    "mehl","weizenmehl","dinkelmehl","roggenmehl","vollkornmehl","grieß","haferflocken",
+    "müsli","cornflakes","cerealien","granola","porridge","scones","madeleine"
+  ],
+  "🥩 Fleisch & Wurst": [
+    "fleisch","rind","rindfleisch","rinderhack","hackfleisch","steak","roastbeef","entrecôte",
+    "ribeye","filet","rumpsteak","tafelspitz","gulasch","schnitzel","schwein","schweinefleisch",
+    "schweinebauch","spareribs","kotelett","nacken","schulter","haxe","kassler","schinken",
+    "kochschinken","rohschinken","serrano","parma","prosciutto","salami","pepperoni",
+    "chorizo","mettwurst","leberwurst","blutwurst","bratwurst","rostbratwurst","grillwurst",
+    "wiener","frankfurter","bockwurst","fleischwurst","mortadella","lyoner","hähnchen",
+    "hühnchen","chicken","brustfilet","hähnchenkeule","hähnchenflügel","pute","putenbrust",
+    "ente","gans","lamm","lammfleisch","lammkeule","lammlachs","kalbfleisch","kalb",
+    "wild","wildschwein","hirsch","reh","fasan","kaninchen","speck","bacon","pancetta",
+    "wurst","aufschnitt","geflügel","filet"
+  ],
+  "🧴 Drogerie": [
+    "shampoo","haarshampoo","conditioner","spülung","haarbalsam","haarmaske","haargel",
+    "haarspray","haarwachs","haarcreme","zahnpasta","zahncreme","elmex","colgate","blend-a-med",
+    "zahnbürste","elektrische zahnbürste","zahnseide","mundspülung","mundwasser","listerine",
+    "seife","handseife","duschgel","schaumbad","badezusatz","body wash","deo","deodorant",
+    "antitranspirant","nivea","dove","rexona","axe","parfum","eau de toilette","aftershave",
+    "rasierklinge","rasierer","rasierschaum","rasiergel","wattestäbchen","watte","wattepad",
+    "taschentuch","taschentücher","tempo","kleenex","toilettenpapier","klopapier","küchenrolle",
+    "küchentuch","feuchttuch","feuchttücher","windel","windeln","pampers","binden","tampon",
+    "tampons","slipeinlage","kondom","creme","lotion","bodylotion","handcreme","sonnencreme",
+    "sonnenmilch","lippenpflege","lippenstift","mascara","foundation","concealer","rouge",
+    "lidschatten","nagellack","wattepads","make-up","kosmetik","pflaster","verband",
+    "ibuprofen","aspirin","paracetamol","medikament","vitamin","nasenspray","augentropfen",
+    "kontaktlinsen","brillenreiniger","haarbürste","kamm","q-tips","reinigungsmilch",
+    "mizellenwasser","abschminken","toner","serum","feuchtigkeitscreme","anti-aging"
+  ],
+  "🥫 Vorräte": [
+    "nudeln","spaghetti","penne","fusilli","rigatoni","farfalle","tagliatelle","linguine",
+    "fettuccine","lasagneplatten","reis","basmati","jasminreis","vollkornreis","risotto",
+    "wildreis","couscous","bulgur","quinoa","polenta","graupen","linsen","kidneybohnen",
+    "kichererbsen","weiße bohnen","schwarze bohnen","erbsen","dose","dosenmais","dosentomaten",
+    "tomatenmark","tomatensoße","passata","dosenerbsen","thunfisch","sardinen","lachs dose",
+    "hering","sprotten","öl","olivenöl","rapsöl","sonnenblumenöl","kokosöl","sesamöl",
+    "essig","weinessig","balsamico","apfelessig","sojasoße","worcester","tabasco","senf",
+    "ketchup","mayo","mayonnaise","remoulade","bbq-soße","pestp","pesto","tomatenpesto",
+    "hummus","salsa","guacamole","salz","meersalz","pfeffer","paprikapulver","curry",
+    "kurkuma","zimt","muskat","oregano","thymian","rosmarin","basilikum","petersilie",
+    "lorbeer","kümmel","fenchelsamen","anis","chili","gewürz","gewürze","knoblauchpulver",
+    "zwiebelpulver","suppenwürze","brühe","bouillon","soße","instantsuppe","suppenpulver",
+    "zucker","brauner zucker","puderzucker","honig","ahornsirup","agavendicksaft",
+    "marmelade","konfitüre","gelee","nussmus","erdnussbutter","nutella","aufstrich",
+    "cornichons","essiggurken","kapern","oliven","artischocken glas","eingelegte paprika",
+    "schokolade","tafelschokolade","kakao","backkakao","backschokolade","mandeln","nüsse",
+    "cashews","walnüsse","erdnüsse","pistazien","haselnüsse","macadamia","paranüsse",
+    "sonnenblumenkerne","kürbiskerne","sesam","leinsamen","chiasamen","rosinen","cranberries",
+    "datteln","aprikosen getrocknet","pflaumenmuss","chips","crackers","reiswaffeln",
+    "popcorn","snack","müsliriegel","proteinriegel","kaffee","espresso","filterkaffee",
+    "nescafe","tee","grüner tee","schwarzer tee","kräutertee","früchtetee","instant",
+    "fertiggericht","tiefkühlpizza","mehl"
+  ],
+  "🧊 Tiefkühl": [
+    "tiefkühl","gefroren","eis","eiscreme","eisbecher","sorbet","gelato","frozen",
+    "tiefkühlpizza","pizza gefroren","tiefkühlgemüse","erbsen tiefkühl","spinat tiefkühl",
+    "bohnen tiefkühl","brokkoli tiefkühl","tiefkühlfisch","fischstäbchen","garnelen gefroren",
+    "shrimps tiefkühl","lachs tiefkühl","tiefkühlfleisch","burger patties","nuggets",
+    "chicken nuggets","pommes","pommes frites","tiefkühlkartoffeln","rösti","kroketten",
+    "tiefkühlbrot","baguette tiefkühl","waffeln tiefkühl","pfannkuchen tiefkühl",
+    "tiefkühlbeeren","erdbeeren gefroren","himbeeren gefroren","früchtemix gefroren",
+    "tiefkühlmahlzeit","fertigmenü","lasagne tiefkühl","kühlkost"
+  ],
+  "🍷 Getränke": [
+    "wasser","mineralwasser","still","sprudelwasser","leitungswasser","quellwasser",
+    "saft","orangensaft","apfelsaft","multivitaminsaft","traubensaft","tomatensaft",
+    "möhrensaft","ananassaft","mangosaft","smoothie","nektar","limonade","limo",
+    "cola","coca cola","pepsi","fanta","sprite","mezzo mix","fritz","bionade",
+    "energy drink","red bull","monster","powerdrink","eistee","eistee zitrone",
+    "ice tea","bier","pils","lager","weizen","weißbier","alkoholfrei","radler",
+    "wein","rotwein","weißwein","rosé","sekt","prosecco","champagner","cava",
+    "whisky","whiskey","vodka","rum","gin","likör","schnaps","spirituosen",
+    "kaffee fertig","cappuccino","latte macchiato","cold brew","kaffeemilch",
+    "kakao trinkfertig","milchkaffee","oatly","haferkaffee","milch trinkfertig",
+    "sprudel","selters","apollinaris","gerolsteiner","evian","volvic","san pellegrino",
+    "kombucha","kefir trinkfertig","buttermilch","molke"
+  ]
+};
+
+function detectCategory(productName) {
+  // Wenn der Nutzer manuell eine andere Kategorie gewählt hat, diese bevorzugen
+  const categoryEl = document.getElementById("shoppingCategory");
+  const manualCategory = categoryEl.value;
+  if (manualCategory !== "🛒 Sonstiges") return manualCategory;
+
+  const normalized = productName.toLowerCase()
+    .replace(/ä/g,"ä").replace(/ö/g,"ö").replace(/ü/g,"ü")
+    .replace(/[^a-zäöüß ]/g," ");
+
+  const words = normalized.split(/\s+/).filter(Boolean);
+
+  // Zähle Treffer pro Kategorie
+  const scores = {};
+  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    scores[category] = 0;
+    for (const kw of keywords) {
+      for (const word of words) {
+        if (word === kw || word.includes(kw) || kw.includes(word)) {
+          scores[category] += kw.length; // längere Treffer stärker gewichten
+        }
+      }
+    }
+  }
+
+  const best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
+  if (best && best[1] > 0) return best[0];
+  return "🛒 Sonstiges";
+}
+
 async function addShoppingItem() {
   const input = document.getElementById("shoppingInput");
-  const categoryEl = document.getElementById("shoppingCategory");
   const name = input.value.trim();
-  const category = categoryEl.value;
 
   if (!name) {
     input.focus();
@@ -120,6 +268,13 @@ async function addShoppingItem() {
     return;
   }
 
+  // Kategorie sofort & lokal erkennen (kein Server, kein Warten)
+  const category = detectCategory(name);
+
+  // Dropdown kurz auf erkannte Kategorie setzen (visuelles Feedback)
+  const categoryEl = document.getElementById("shoppingCategory");
+  categoryEl.value = category;
+
   try {
     await addDoc(collection(db, SHOPPING_COLLECTION), {
       name,
@@ -129,6 +284,7 @@ async function addShoppingItem() {
       createdAt: Date.now()
     });
     input.value = "";
+    categoryEl.value = "🛒 Sonstiges";
     input.focus();
   } catch (e) {
     console.error("Artikel hinzufügen fehlgeschlagen:", e);
